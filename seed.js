@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://gnaneshanguluri16:<Gnanesh16>@cluster1.kl8tltv.mongodb.net/product_recommendation_db?retryWrites=true&w=majority&appName=cluster1";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function main() {
+  if (!MONGODB_URI) {
+    throw new Error("MONGODB_URI is not set");
+  }
+
   await mongoose.connect(MONGODB_URI);
 
   const db = mongoose.connection.db;
