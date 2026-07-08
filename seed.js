@@ -1,6 +1,65 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 
 const MONGODB_URI = process.env.MONGODB_URI;
+
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const ALLOWED_CATEGORIES = new Set(["Dairy", "Detergent", "Ice Cream"]);
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function validateDate(value, fieldName) {
+  assert(typeof value === "string", `${fieldName} must be a string`);
+  assert(DATE_REGEX.test(value), `${fieldName} must be in YYYY-MM-DD format`);
+  const date = new Date(value);
+  assert(!Number.isNaN(date.getTime()), `${fieldName} must be a valid date`);
+  assert(
+    date.toISOString().startsWith(value),
+    `${fieldName} must be a valid calendar date`
+  );
+}
+
+function validateProduct(product) {
+  assert(product.productName, "productName is required");
+  assert(product.category, "category is required");
+  assert(product.brand, "brand is required");
+  assert(ALLOWED_CATEGORIES.has(product.category), `Invalid category: ${product.category}`);
+  assert(Number.isFinite(product.price), "price must be a number");
+  assert(product.price >= 0, "price cannot be negative");
+  assert(Number.isFinite(product.rating), "rating must be a number");
+  assert(product.rating >= 0 && product.rating <= 5, "rating must be between 0 and 5");
+  assert(product.imageUrl, "imageUrl is required");
+  validateDate(product.createdAt, "createdAt");
+}
+
+function validateInventoryItem(item) {
+  assert(item.productId, "productId is required");
+  assert(Number.isInteger(item.availableQuantity), "availableQuantity must be an integer");
+  assert(item.availableQuantity >= 0, "availableQuantity cannot be negative");
+  validateDate(item.updatedAt, "updatedAt");
+}
+
+function validateRecommendation(rec) {
+  assert(rec.sourceProductId, "sourceProductId is required");
+  assert(rec.recommendedProductId, "recommendedProductId is required");
+  assert(
+    String(rec.sourceProductId) !== String(rec.recommendedProductId),
+    "sourceProductId and recommendedProductId must be different"
+  );
+  assert(
+    Number.isInteger(rec.recommendationScore),
+    "recommendationScore must be an integer"
+  );
+  assert(
+    rec.recommendationScore >= 0 && rec.recommendationScore <= 100,
+    "recommendationScore must be between 0 and 100"
+  );
+  assert(rec.reason, "reason is required");
+}
 
 async function main() {
   if (!MONGODB_URI) {
@@ -10,6 +69,18 @@ async function main() {
   await mongoose.connect(MONGODB_URI);
 
   const db = mongoose.connection.db;
+  const productsCollection = db.collection("products");
+  const inventoryCollection = db.collection("inventory");
+  const recommendationsCollection = db.collection("recommendations");
+
+  await Promise.all([
+    productsCollection.createIndex({ productName: 1, brand: 1 }, { unique: true }),
+    inventoryCollection.createIndex({ productId: 1 }, { unique: true }),
+    recommendationsCollection.createIndex(
+      { sourceProductId: 1, recommendedProductId: 1 },
+      { unique: true }
+    ),
+  ]);
 
   const products = [
     {
@@ -130,16 +201,49 @@ async function main() {
     },
   ];
 
-  const insertedProducts = await db.collection("products").insertMany(products);
-  const productIds = Object.values(insertedProducts.insertedIds);
+  products.forEach(validateProduct);
 
-  const inventory = productIds.map((productId, index) => ({
-    productId,
-    availableQuantity: [25, 12, 30, 20, 16, 14, 18, 22, 10, 15, 19, 11][index],
+  const inventoryQuantities = [25, 12, 30, 20, 16, 14, 18, 22, 10, 15, 19, 11];
+  assert(
+    inventoryQuantities.length === products.length,
+    "inventory quantities must match product count"
+  );
+
+  const productIdByKey = new Map();
+
+  for (const product of products) {
+    const existingProduct = await productsCollection.findOne({
+      productName: product.productName,
+      brand: product.brand,
+    });
+
+    if (existingProduct) {
+      await productsCollection.updateOne(
+        { _id: existingProduct._id },
+        { $set: product }
+      );
+      productIdByKey.set(`${product.productName}::${product.brand}`, existingProduct._id);
+    } else {
+      const result = await productsCollection.insertOne(product);
+      productIdByKey.set(`${product.productName}::${product.brand}`, result.insertedId);
+    }
+  }
+
+  const inventory = products.map((product, index) => ({
+    productId: productIdByKey.get(`${product.productName}::${product.brand}`),
+    availableQuantity: inventoryQuantities[index],
     updatedAt: "2026-07-07",
   }));
 
-  await db.collection("inventory").insertMany(inventory);
+  inventory.forEach(validateInventoryItem);
+
+  for (const item of inventory) {
+    await inventoryCollection.updateOne(
+      { productId: item.productId },
+      { $set: item },
+      { upsert: true }
+    );
+  }
 
   const recommendations = [];
   for (const sourceProduct of products) {
@@ -167,16 +271,32 @@ async function main() {
       .slice(0, 3);
 
     for (const rec of ranked) {
-      recommendations.push({
-        sourceProductId: productIds[sourceIndex],
-        recommendedProductId: productIds[products.indexOf(rec.item)],
+      const recommendation = {
+        sourceProductId: productIdByKey.get(
+          `${sourceProduct.productName}::${sourceProduct.brand}`
+        ),
+        recommendedProductId: productIdByKey.get(
+          `${rec.item.productName}::${rec.item.brand}`
+        ),
         recommendationScore: Math.round(rec.score),
         reason: "Same category, ranked by brand, price, rating, and availability",
-      });
+      };
+
+      validateRecommendation(recommendation);
+      recommendations.push(recommendation);
     }
   }
 
-  await db.collection("recommendations").insertMany(recommendations);
+  for (const rec of recommendations) {
+    await recommendationsCollection.updateOne(
+      {
+        sourceProductId: rec.sourceProductId,
+        recommendedProductId: rec.recommendedProductId,
+      },
+      { $set: rec },
+      { upsert: true }
+    );
+  }
 
   console.log("Seed completed successfully");
   await mongoose.disconnect();

@@ -1,26 +1,14 @@
 {
-  "name": "backend",
+  "name": "recommendation-engine-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "private": true,
+  "description": "Seed data script for recommendation engine backend",
+  "main": "seed.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node server.js",
-    "dev": "cross-env NODE_ENV=development nodemon server.js"
+    "seed": "node seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.6",
-    "cross-env": "^10.1.0",
-    "dotenv": "^17.4.2",
-    "express": "^4.21.2",
-    "helmet": "^8.2.0",
-    "joi": "^18.2.3",
-    "mongoose": "^8.18.0",
-    "morgan": "^1.11.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.8.4"
   }
 }
