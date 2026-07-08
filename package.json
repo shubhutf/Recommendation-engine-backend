@@ -1,0 +1,14 @@
+{
+  "name": "recommendation-engine-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Seed data script for recommendation engine backend",
+  "main": "seed.js",
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.8.4"
+  }
+}
