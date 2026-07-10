@@ -1,3 +1,6 @@
+
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Forces Node to bypass your local ISP's DNS lookup block
 require("dotenv").config();
 const mongoose = require("mongoose");
 
@@ -67,6 +70,7 @@ async function main() {
   }
 
   await mongoose.connect(MONGODB_URI);
+
 
   const db = mongoose.connection.db;
   const productsCollection = db.collection("products");
@@ -286,6 +290,17 @@ async function main() {
       recommendations.push(recommendation);
     }
   }
+
+    const allProducts = await productsCollection.find().toArray();
+
+  console.log(
+    allProducts.map((p) => ({
+      id: p._id.toString(),
+      name: p.productName,
+      brand: p.brand
+    }))
+  );
+
 
   for (const rec of recommendations) {
     await recommendationsCollection.updateOne(
