@@ -1,5 +1,6 @@
-const dns = require('dns');
-dns.setServers(['8.8.8.8', '8.8.4.4']); // Forces Node to bypass your local ISP's broken DNS lookup
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 require("dotenv").config();
 
 const express = require("express");
@@ -20,15 +21,14 @@ async function start() {
       message: "Recommendation backend is running",
     });
   });
-} // <--- Added this missing closing bracket to finish the start function safely!
+}
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Port conflict error handler
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
     const nextPort = Number(PORT) + 1;
     console.log(`⚠️ Port ${PORT} is busy. Trying port ${nextPort}...`);
     app.listen(nextPort, () => {
