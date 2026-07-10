@@ -41,8 +41,6 @@ const InventorySchema = new mongoose.Schema(
  * ======================================================
  */
 
-InventorySchema.index({ productId: 1 });
-
 /**
  * Inventory model export kar rahe hain.
  */

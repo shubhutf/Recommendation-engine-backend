@@ -1,10 +1,12 @@
-// Load environment variables from .env
+// 1. FORCED CORE DNS RESOLVER OVERRIDE (Must be line 1)
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]); 
+
+// 2. Load environment variables from .env
 require("dotenv").config();
 
-// Import the Express app
+// 3. Import dependencies (Declared exactly once)
 const app = require("./src/app");
-
-// Import MongoDB connection function
 const connectDB = require("./config/db");
 
 // Define the port
