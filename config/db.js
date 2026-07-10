@@ -1,25 +1,31 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+
+// FORCE NODE TO USE GOOGLE DNS TO BYPASS ISP BLOCKS
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const connectDB = async () => {
   try {
     console.log("Connecting to MongoDB...");
 
-    // Environment variable se MongoDB URI le rahe hain.
-  console.log("MongoDB URI loaded");
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI is missing from your environment variables!");
+    }
 
-    // MongoDB database se connection establish kar rahe hain.
-   const conn = await mongoose.connect(process.env.MONGO_URI, {
-  family: 4
-});
+    console.log("MongoDB URI loaded");
 
-    console.log("Connected");
-    console.log(conn.connection.readyState);
-    console.log(conn.connection.host);
+    // Force IPv4 connection
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      family: 4
+    });
+
+    console.log("Connected Successfully!");
+    console.log(`Database Host: ${conn.connection.host}`);
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ Database connection error details:", err.message);
     throw err;
-    }
+  }
 };
 
 module.exports = connectDB;

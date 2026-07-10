@@ -1,44 +1,45 @@
-// 1. FORCED CORE DNS RESOLVER OVERRIDE (Must be line 1)
-const dns = require("dns");
-dns.setServers(["8.8.8.8", "1.1.1.1"]); 
-
-// 2. Load environment variables from .env
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Forces Node to bypass your local ISP's broken DNS lookup
 require("dotenv").config();
 
-// 3. Import dependencies (Declared exactly once)
-const app = require("./src/app");
+const express = require("express");
 const connectDB = require("./config/db");
+const recommendationRoutes = require("./recommendationRoutes");
 
-// Define the port
+const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Start the application
-const startServer = async () => {
-  try {
-    // Connect to MongoDB first
-    await connectDB();
+async function start() {
+  await connectDB();
 
-    // Start Express server only after DB connection
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  app.use(express.json());
+  app.use("/recommendations", recommendationRoutes);
+
+  app.get("/", (req, res) => {
+    res.json({
+      message: "Recommendation backend is running",
     });
-  } catch (error) {
-    console.error("❌ Failed to start server");
-    console.error(error.message);
-    process.exit(1);
-  }
-};
+  });
+} // <--- Added this missing closing bracket to finish the start function safely!
 
-startServer();
-
-// Handle unexpected promise rejections
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err.message);
-  process.exit(1);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
-// Handle unexpected synchronous errors
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err.message);
+// Port conflict error handler
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    const nextPort = Number(PORT) + 1;
+    console.log(`⚠️ Port ${PORT} is busy. Trying port ${nextPort}...`);
+    app.listen(nextPort, () => {
+      console.log(`Server fallback running on port ${nextPort}`);
+    });
+  } else {
+    console.error(err);
+  }
+});
+
+start().catch((err) => {
+  console.error("Server failed to start:", err.message);
   process.exit(1);
 });
