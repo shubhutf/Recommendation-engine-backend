@@ -3,6 +3,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { getRecommendations } = require("./recommendationService");
+const { buildRecommendationExplanation } = require("./aiExplanationService");
 
 const router = express.Router();
 
@@ -50,9 +51,24 @@ router.get("/:productId", async (req, res) => {
       3
     );
 
+    const explainedRecommendations = await Promise.all(recommendations.map(async (recommendation) => {
+      const recommendedProduct = allProducts.find(
+        (product) => String(product._id) === String(recommendation.productId)
+      );
+
+      return {
+        ...recommendation,
+        explanation: await buildRecommendationExplanation(
+          sourceProduct,
+          recommendedProduct,
+          recommendation.breakdown
+        ),
+      };
+    }));
+
     return res.json({
       sourceProductId: String(sourceProduct._id),
-      recommendations,
+      recommendations: explainedRecommendations,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
