@@ -6,6 +6,7 @@ require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/db");
 const recommendationRoutes = require("./recommendationRoutes");
+const analyticsRoutes = require("./analytics/analyticsRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +16,7 @@ async function start() {
 
   app.use(express.json());
   app.use("/recommendations", recommendationRoutes);
+  app.use("/analytics", analyticsRoutes);
 
   app.get("/", (req, res) => {
     res.json({
