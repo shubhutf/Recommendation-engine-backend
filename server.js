@@ -1,44 +1,33 @@
-// 1. FORCED CORE DNS RESOLVER OVERRIDE (Must be line 1)
-const dns = require("dns");
-dns.setServers(["8.8.8.8", "1.1.1.1"]); 
-
-// 2. Load environment variables from .env
 require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const recommendationRoutes = require("./recommendationRoutes");
 
-// 3. Import dependencies (Declared exactly once)
-const app = require("./src/app");
-const connectDB = require("./config/db");
-
-// Define the port
+const app = express();
 const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Start the application
-const startServer = async () => {
-  try {
-    // Connect to MongoDB first
-    await connectDB();
-
-    // Start Express server only after DB connection
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("❌ Failed to start server");
-    console.error(error.message);
-    process.exit(1);
+async function start() {
+  if (!MONGODB_URI) {
+    throw new Error("MONGODB_URI is not set");
   }
-};
 
-startServer();
+  await mongoose.connect(MONGODB_URI);
 
-// Handle unexpected promise rejections
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err.message);
-  process.exit(1);
-});
+  app.use(express.json());
+  app.use("/recommendations", recommendationRoutes);
 
-// Handle unexpected synchronous errors
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err.message);
+  app.get("/", (req, res) => {
+    res.json({ message: "Recommendation backend is running" });
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+start().catch(async (err) => {
+  console.error("Server failed to start:", err);
+  await mongoose.disconnect().catch(() => {});
   process.exit(1);
 });
