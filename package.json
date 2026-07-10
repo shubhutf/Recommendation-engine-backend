@@ -5,11 +5,16 @@
   "description": "Seed data script for recommendation engine backend",
   "main": "seed.js",
   "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "seed": "node seed.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "mongoose": "^8.8.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
