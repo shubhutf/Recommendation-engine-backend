@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const productRoutes = require("./routes/product.routes");
 // Global error handler middleware import kar rahe hain.
 const errorHandler = require("./middlewares/errorHandler.middleware");
+const analyticsRoutes = require("../analytics/analyticsRoutes");
 
 // Create Express application
 const app = express();
@@ -53,6 +54,8 @@ app.use("/api/v1/recommendations", recommendationRoutes);
 // Inventory related APIs
 // Base URL: /api/v1/inventory
 app.use("/api/v1/inventory", inventoryRoutes);
+
+app.use("/api/v1/analytics", analyticsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
