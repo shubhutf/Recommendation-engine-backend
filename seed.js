@@ -173,7 +173,7 @@ async function main() {
       brand: "Amul",
       price: 70,
       rating: 4.4,
-      imageUrl: "/images/amul-vanilla-ice-cream.png",
+      imageUrl: "https://www.bbassets.com/media/uploads/p/m/40005429_3-amul-real-ice-cream-vanilla-magic.jpg?tr=w-154,q-80",
       createdAt: "2026-07-07",
     },
     {
@@ -182,7 +182,7 @@ async function main() {
       brand: "Kwality Walls",
       price: 75,
       rating: 4.5,
-      imageUrl: "/images/kwality-walls-chocolate-ice-cream.png",
+      imageUrl: "https://www.bbassets.com/media/uploads/p/m/40297715_6-kwality-walls-hazelnut-chocolate-ice-cream.jpg?tr=w-154,q-80",
       createdAt: "2026-07-07",
     },
     {
@@ -191,7 +191,7 @@ async function main() {
       brand: "Havmor",
       price: 68,
       rating: 4.3,
-      imageUrl: "/images/havmor-strawberry-ice-cream.png",
+      imageUrl: "https://www.bbassets.com/media/uploads/p/l/40337881_1-havmor-mahabaleshwar-strawberry-ice-cream.jpg",
       createdAt: "2026-07-07",
     },
     {
@@ -200,7 +200,7 @@ async function main() {
       brand: "Movenpick",
       price: 90,
       rating: 4.6,
-      imageUrl: "/images/movenpick-butterscotch-ice-cream.png",
+      imageUrl: "https://www.moevenpick-icecream.com/sites/default/files/styles/listing_image/public/products/photos/2525029%20FRO%20Standalone%20Cailler%20Branche%20fu%CC%88r%20WEB.png?itok=pt8XFhR_",
       createdAt: "2026-07-07",
     },
   ];
