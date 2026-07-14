@@ -82,7 +82,7 @@ async function main() {
     inventoryCollection.createIndex({ productId: 1 }, { unique: true }),
     recommendationsCollection.createIndex(
       { sourceProductId: 1, recommendedProductId: 1 },
-      { unique: true }
+      // { unique: true }
     ),
   ]);
 

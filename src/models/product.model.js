@@ -28,9 +28,15 @@ const ProductSchema = new mongoose.Schema(
 // Example: 500ml, 1L, 2kg, 250g
 size: {
   type: String,
-  required: [true, "Product size is required"],
+  required: [false, "Product size is required"],
   trim: true,
 },
+
+imageUrl: {
+  type: String,
+  trim: true,
+},
+
 
     // Product ki selling price
     price: {

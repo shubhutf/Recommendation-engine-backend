@@ -44,4 +44,4 @@ const InventorySchema = new mongoose.Schema(
 /**
  * Inventory model export kar rahe hain.
  */
-module.exports = mongoose.model("Inventory", InventorySchema);
+module.exports = mongoose.model("Inventory", InventorySchema, "inventory");

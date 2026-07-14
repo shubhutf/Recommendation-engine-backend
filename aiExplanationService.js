@@ -90,7 +90,7 @@ async function buildGeminiExplanation(sourceProduct, recommendedProduct, breakdo
   ].join("\n");
 
   const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(apiKey)}`;
 
   try {
     const response = await postJson(url, {
@@ -100,12 +100,16 @@ async function buildGeminiExplanation(sourceProduct, recommendedProduct, breakdo
         },
       ],
       generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 120,
+      temperature: 0.2,
+      maxOutputTokens: 200,
+      thinkingConfig: {
+        thinkingBudget: 0,
       },
+    },
     });
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      console.error("Gemini API error:", response.statusCode, response.body);
       return buildFallbackExplanation(sourceProduct, recommendedProduct, breakdown);
     }
 
@@ -118,7 +122,8 @@ async function buildGeminiExplanation(sourceProduct, recommendedProduct, breakdo
         ?.trim();
 
     return text || buildFallbackExplanation(sourceProduct, recommendedProduct, breakdown);
-  } catch {
+  } catch (err) {
+    console.error("Gemini request failed:", err.message);
     return buildFallbackExplanation(sourceProduct, recommendedProduct, breakdown);
   }
 }

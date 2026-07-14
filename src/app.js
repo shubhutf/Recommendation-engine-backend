@@ -13,8 +13,7 @@ const analyticsRoutes = require("../analytics/analyticsRoutes");
 const app = express();
 
 // Recommendation routes import kar rahe hain.
-const recommendationRoutes = require("./routes/recommendation.routes");
-
+const recommendationRoutes = require("../recommendationRoutes");
 // Inventory routes import kar rahe hain.
 const inventoryRoutes = require("./routes/inventory.routes");
 // Security middleware

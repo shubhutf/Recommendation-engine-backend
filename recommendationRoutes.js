@@ -66,6 +66,24 @@ router.get("/:productId", async (req, res) => {
       };
     }));
 
+    // Log each recommendation event so Analytics reflects real usage over time,
+    // instead of staying frozen at whatever the seed script inserted.
+    try {
+      await db.collection("recommendations").insertMany(
+        explainedRecommendations.map((r) => ({
+          sourceProductId: sourceProduct._id,
+          recommendedProductId: new mongoose.Types.ObjectId(r.productId),
+          recommendationScore: r.score,
+          reason: r.explanation,
+          createdAt: new Date(),
+        }))
+      );
+    } catch (logError) {
+      // Don't fail the whole request if logging fails — the recommendation
+      // response itself is still valid and should reach the user.
+      console.error("Failed to log recommendation event:", logError);
+    }
+
     return res.json({
       sourceProductId: String(sourceProduct._id),
       recommendations: explainedRecommendations,

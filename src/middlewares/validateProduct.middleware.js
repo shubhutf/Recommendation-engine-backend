@@ -17,11 +17,13 @@ const createProductSchema = Joi.object({
 
   brand: Joi.string().trim().required(),
 
-  size: Joi.string().trim().required(),
+  size: Joi.string().trim().optional(), // not part of the real data model — kept optional, not removed, in case other products use it
 
   price: Joi.number().min(0).required(),
 
   rating: Joi.number().min(0).max(5).optional(),
+
+  imageUrl: Joi.string().trim().uri().optional(), // was completely missing — every real product has this
 });
 
 /**
@@ -45,6 +47,8 @@ const updateProductSchema = Joi.object({
   price: Joi.number().min(0),
 
   rating: Joi.number().min(0).max(5),
+
+  imageUrl: Joi.string().trim().uri(),
 }).min(1);
 
 /**
