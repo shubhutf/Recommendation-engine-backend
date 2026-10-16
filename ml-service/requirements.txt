@@ -1,0 +1,10 @@
+sentence-transformers==5.1.1
+xgboost==3.1.1
+numpy==2.3.4
+pandas==2.3.3
+matplotlib==3.10.7
+fastapi==0.119.1
+uvicorn==0.38.0
+pymongo==4.15.3
+pytest==8.4.2
+httpx==0.28.1

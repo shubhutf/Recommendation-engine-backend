@@ -16,7 +16,7 @@ function buildFallbackExplanation(sourceProduct, recommendedProduct, breakdown) 
 
   if (typeof sourceProduct.price === "number" && typeof recommendedProduct.price === "number") {
     const priceDiff = Math.abs(recommendedProduct.price - sourceProduct.price);
-    parts.push(`close price difference of ${priceDiff}`);
+    parts.push(`a price difference of ₹${priceDiff.toFixed(2)}`);
   }
 
   if (typeof recommendedProduct.rating === "number") {
@@ -31,7 +31,7 @@ function buildFallbackExplanation(sourceProduct, recommendedProduct, breakdown) 
     return "Recommended based on overall product similarity.";
   }
 
-  return `Recommended because it has ${parts.join(", ")}.`;
+  return `Alternative with ${parts.join(", ")}.`;
 }
 
 function safeJsonParse(text) {
@@ -67,6 +67,7 @@ function postJson(url, body) {
     );
 
     request.on("error", reject);
+    request.setTimeout(2500, () => request.destroy(new Error("Explanation timeout")));
     request.write(JSON.stringify(body));
     request.end();
   });
@@ -83,6 +84,7 @@ async function buildGeminiExplanation(sourceProduct, recommendedProduct, breakdo
     "Return one short sentence in plain English.",
     "Do not mention that you are an AI model.",
     "Do not invent facts not present in the data.",
+    "Describe product attributes only. Do not claim causal model importance, rank products, or select another product.",
     "",
     `Source product: ${JSON.stringify(sourceProduct)}`,
     `Recommended product: ${JSON.stringify(recommendedProduct)}`,

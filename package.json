@@ -5,20 +5,28 @@
   "description": "Seed data script for recommendation engine backend",
   "main": "seed.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "node --watch server.js",
     "start": "node server.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "test": "node --test test/*.test.js",
+    "admin:create": "node scripts/create-admin.js",
+    "dev:local": "node scripts/dev-local.js",
+    "events:export": "node scripts/export-events.js",
+    "smoke:local": "node scripts/smoke-local.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.7.1",
     "helmet": "^8.2.0",
     "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.8.4",
     "morgan": "^1.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.3.1"
   }
 }

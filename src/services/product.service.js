@@ -93,8 +93,8 @@ class ProductService {
       }
 
       // Pagination calculate kar rahe hain.
-      const pageNumber = Number(page);
-      const pageLimit = Number(limit);
+      const pageNumber = Math.max(1, Math.floor(Number(page) || 1));
+      const pageLimit = Math.min(200, Math.max(1, Math.floor(Number(limit) || 10)));
       const skip = (pageNumber - 1) * pageLimit;
 
       // Products aur total count parallel me fetch kar rahe hain.
@@ -176,6 +176,12 @@ class ProductService {
       if (!deletedProduct) {
         throw new Error("Product not found.");
       }
+
+      // Remove dependent rows; historical events intentionally keep immutable snapshots.
+      await Promise.all([
+        require("../models/inventory.model").deleteMany({ productId }),
+        Product.db.collection("recommendations").deleteMany({ $or: [{ sourceProductId: deletedProduct._id }, { recommendedProductId: deletedProduct._id }] }),
+      ]);
 
       return deletedProduct;
     } catch (error) {

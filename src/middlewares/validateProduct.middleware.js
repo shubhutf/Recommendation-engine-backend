@@ -11,6 +11,7 @@ const Joi = require("joi");
  * =====================================================
  */
 const createProductSchema = Joi.object({
+  description: Joi.string().max(1000).allow(""),
   productName: Joi.string().trim().min(2).max(100).required(),
 
   category: Joi.string().trim().required(),
@@ -36,6 +37,7 @@ const createProductSchema = Joi.object({
  * =====================================================
  */
 const updateProductSchema = Joi.object({
+  description: Joi.string().max(1000).allow(""),
   productName: Joi.string().trim().min(2).max(100),
 
   category: Joi.string().trim(),

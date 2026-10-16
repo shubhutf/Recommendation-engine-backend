@@ -1,112 +1,119 @@
-# Recommendation Engine — Backend
+# Restock recommendation backend
 
-Node.js/Express + MongoDB backend powering the [Smart Substitution and Product Recommendation Engine](https://github.com/shubhutf/Recommendation-engine-Frontend). Handles product/inventory management, the recommendation scoring engine, and AI-generated explanations via Google Gemini.
+Express + MongoDB API with JWT customer/admin access, attributed interaction events, a permanent deterministic fallback, and an evaluated XGBoost ranking model served by FastAPI. Gemini only describes the selected products; it never chooses or ranks them.
 
-**Frontend repo:** https://github.com/shubhutf/Recommendation-engine-Frontend
-**Live API:** deployed on Render
+The checked-in model was trained on **simulated data**. Results below are actual held-out reranking metrics, not evidence of real-user performance. Current production URLs and rollout verification are recorded in [RELEASE](docs/RELEASE.md).
 
----
+| Engine | Precision@3 | Recall@3 | NDCG@3 |
+|---|---:|---:|---:|
+| Rules | 0.129756 | 0.291864 | 0.213192 |
+| XGBoost | 0.153077 | 0.345739 | 0.271443 |
 
-## Tech Stack
+Source: [`ml-service/artifacts/evaluation.json`](ml-service/artifacts/evaluation.json), 1,901 test requests. Model `v1-f196f47d`; 240 simulated users, 128 synthetic products, 77,890 events. Full scope, assumptions and caveats: [DATA](docs/DATA.md), [evaluation report](ml-service/artifacts/EVALUATION.md), [model card](ml-service/artifacts/MODEL_CARD.md).
 
-- Node.js + Express
-- MongoDB Atlas (Mongoose)
-- Google Gemini API (`gemini-flash-latest`) — AI explanation generation
-- Joi — request validation
-- Helmet, CORS, Morgan — security & logging
+## Local demo without Atlas or secrets
 
----
+Requirements: Node 22+, Python 3.11, internet for package/model/Mongo binary downloads on first setup. Commands are PowerShell-compatible, starting from the parent folder containing both repos.
 
-## Setup
-
-```bash
-git clone https://github.com/shubhutf/Recommendation-engine-backend.git
-cd Recommendation-engine-backend
-npm install
+```powershell
+Set-Location .\Recommendation-engine-backend
+npm ci
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r .\ml-service\requirements.lock
+npm run dev:local
 ```
 
-Create a `.env` file in the project root:
-```
-MONGODB_URI=your_mongodb_connection_string
-PORT=5000
-GEMINI_API_KEY=your_gemini_api_key
-```
+This starts a disposable MongoDB and the API at `http://127.0.0.1:5000/api/v1`, loads the clearly labeled synthetic catalog, and generates a process-local JWT signing key. Accounts/events reset on exit. No Atlas URI is read and Gemini is disabled. Optionally set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in that shell before starting to provision a local admin. Register normal customers through the frontend.
 
-```bash
-npm run dev      # start with nodemon (auto-restart on changes)
-npm start        # start normally
-npm run seed     # populate the database with sample data
+In a second terminal, from this backend directory:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app:app --app-dir ml-service --host 127.0.0.1 --port 8000
 ```
 
----
+First startup downloads the pinned pretrained MiniLM weights into ignored `ml-service/.cache/`. The committed product vector cache and XGBoost model are already available.
 
-## API Reference
+In a third terminal, from the common parent:
 
-### Products
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/products` | List products (supports `category`, `brand`, `limit` query params) |
-| POST | `/api/v1/products` | Create a product |
-| PUT | `/api/v1/products/:id` | Update a product |
-| DELETE | `/api/v1/products/:id` | Delete a product |
-
-### Inventory
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/inventory` | List all inventory records (populated with product details) |
-| POST | `/api/v1/inventory` | Create an inventory record |
-| PUT | `/api/v1/inventory/:id` | Update stock quantity |
-
-### Recommendations
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/recommendations/:productId` | Returns top 3 ranked substitutes with score, breakdown, and AI-generated explanation |
-
-### Analytics
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/analytics/summary` | Real usage stats: most recommended products, most-searched-for products, total recommendation pairs |
-
-### Health
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/health` | Returns `{ success: true, message: "Server is running" }` |
-
----
-
-## Recommendation Scoring
-
-```
-Match Score = 0.4 × Category Match (1 if same category, else excluded)
-            + 0.2 × Price Similarity (closer price = higher score, cheaper gets a small bonus)
-            + 0.2 × Rating (normalized 0–5 → 0–1)
-            + 0.2 × Inventory Availability (1 if in stock, else 0)
+```powershell
+Set-Location .\Recommendation-engine-Frontend
+npm ci
+npm run dev -- --host 127.0.0.1
 ```
 
-In-stock products always rank above out-of-stock ones, regardless of score. Only products in the same category as the source product are considered.
+Open `http://127.0.0.1:5173`. The frontend defaults to the loopback API URL. The explicit IPv4 address also avoids macOS AirPlay intercepting `localhost:5000` during local verification.
 
-## AI Explanation Module
+## Checks and full training
 
-`aiExplanationService.js` calls Gemini with the source product, recommended product, and score breakdown, asking for a one-sentence, factual explanation. If the Gemini call fails for any reason (missing key, rate limit, network error), it falls back to a deterministic template built from the same breakdown data — so the endpoint never fails even if the AI service is unavailable.
+From the backend directory, while the demo and Python services are running for the smoke check:
 
-Every recommendation request is logged to the `recommendations` collection, which powers the Analytics endpoint.
+```powershell
+npm test
+.\.venv\Scripts\python.exe -m pytest .\ml-service -q
+npm run smoke:local
+```
 
----
+`npm test` creates its own isolated MongoDB and checks role guards, credentials/expiry, real-event attribution/deduplication, separation from simulated events, exact rule fallback, invalid/outage/slow scorer fallback, deletion cleanup and artifact loading. `smoke:local` checks actual Node → FastAPI → saved-model inference and refuses a connected database. Its actual report is [LOCAL_SMOKE.json](docs/LOCAL_SMOKE.json). QA events exist only in the disposable database and never enter training data.
 
-## Database Design
+To regenerate the simulated experiment:
 
-**Products collection:** `productName`, `category`, `brand`, `price`, `rating`, `imageUrl`, `createdAt`
+```powershell
+.\.venv\Scripts\python.exe .\ml-service\simulate.py --seed 42 --users 240 --sessions 40
+.\.venv\Scripts\python.exe .\ml-service\embeddings.py
+.\.venv\Scripts\python.exe .\ml-service\train.py
+```
 
-**Inventory collection:** `productId` (ref → Product), `availableQuantity`, `updatedAt`
+Training builds point-in-time examples, splits requests chronologically with 24-hour label-maturity gaps, selects between two depths using validation only, saves the model, and evaluates held-out test requests. Artifacts: `ranker.ubj`, `metadata.json`, `evaluation.json`, `EVALUATION.md`, `MODEL_CARD.md`, `eda.json`, `eda.png`, `embeddings.json`. Raw generated events/preferences/examples are ignored and reproducible. [Phase commands](docs/PHASES.md) and [interview notes](INTERVIEW_NOTES.md) explain the design.
 
-**Recommendations collection** (usage log): `sourceProductId`, `recommendedProductId`, `recommendationScore`, `reason`, `createdAt`
+On macOS/Linux use `python3.11 -m venv .venv` and `.venv/bin/python` in place of the Windows Python paths above. This implementation was run locally on macOS with Node 25 and Python 3.11.
 
----
+## Connect your own development MongoDB
 
-## Environment Variables
+Do not use the disposable demo command for persistent data:
 
-| Variable | Description |
+```powershell
+Copy-Item .env.example .env
+$env:JWT_SECRET = node -e "process.stdout.write(require('node:crypto').randomBytes(48).toString('hex'))"
+# Edit .env: set MONGODB_URI, CORS_ORIGIN and optional ML/Gemini configuration.
+npm run dev
+```
+
+Mongo uses database `recommendation_engine`. JWTs use salted scrypt password hashes, HS256, issuer/audience checks and a default two-hour expiry. Registration always creates a customer; protected mutations check the current database role, not a client role.
+
+Create an admin once in a trusted shell with `ADMIN_EMAIL` and `ADMIN_PASSWORD` set, then run `npm run admin:create`. The CLI refuses to change an existing account. Clear those shell variables afterward. Never commit `.env` or credentials. No public endpoint creates admins.
+
+## API
+
+All paths below are under `/api/v1`. Normal product/inventory read response envelopes are preserved. Recommendation and analytics responses remain plain JSON.
+
+| Method/path | Access / behavior |
 |---|---|
-| `MONGODB_URI` | MongoDB Atlas connection string |
-| `PORT` | Server port (defaults to 5000) |
-| `GEMINI_API_KEY` | Google Gemini API key ([get one free](https://aistudio.google.com/apikey)) — optional, service falls back gracefully if unset |
+| `GET /health` | Readiness and database mode; no credentials |
+| `POST /auth/register`, `/auth/login` | `{email,password}` → `{token,user}`; rate limited |
+| `GET /auth/me` | Bearer token → current user |
+| `GET /products`, `/inventory` | Public browse |
+| `POST /products`, `PUT/DELETE /products/:id` | Admin only |
+| `POST /inventory`, `PUT /inventory/:id` | Admin only |
+| `GET /recommendations/:productId` | Optional JWT; engine/version/reason, scores, embedded products and exposure IDs |
+| `POST /events` | Authenticated VIEW/CLICK/CART/PURCHASE/FEEDBACK; source/identity/time/attribution server owned |
+| `GET /analytics/summary` | Real-provenance logs only; CTR by engine/position; logging drops |
+| `GET /ml/insights` | Saved evaluated metadata/metrics/importance; 503 if artifacts absent |
+
+Recommendation outcomes require `{eventType,productId,impressionId}`; FEEDBACK also requires `feedback: "helpful"` or `"not-helpful"`. A direct VIEW can omit `impressionId`. Duplicate outcomes per type/exposure are idempotent; feedback can be changed. CART/PURCHASE are self-reported intent signals until a trusted order service is added, not verified payments.
+
+## Architecture and serving
+
+```
+React → Node API → Mongo: auth, source + category candidates + inventory
+                 → cold start? deterministic rules
+                 → else Python: shared features → XGBoost ranking margin
+                 → timeout/error? deterministic rules
+                 → top 3 → factual Gemini/local descriptions → JSON
+                 → bounded asynchronous events + legacy recommendations logs
+```
+
+The baseline remains `0.4*category + 0.2*priceSimilarity + 0.2*(rating/5) + 0.2*inStock`, including its cheaper-product bonus and three-decimal rounding. In-stock ranks first and ties use product ID. Baseline fallback retains out-of-stock alternatives when necessary; ML filters them out entirely. Candidates always match category and exclude the source; retrieval caps at 200 products. Anonymous users and users with fewer than five distinct positively interacted products use rules. HTTP scoring has a configurable 1.5-second deadline. ML margins are not calibrated probabilities or comparable with baseline percentages.
+
+`src/` owns product/inventory/auth/events; root recommendation modules own orchestration and baseline; `analytics/` owns summaries; `ml-service/` owns shared Python features, simulation, training and scoring. `inventory` stays explicitly bound to that collection. The old `src/controllers/recommendation.controller.js` is unused.
+
+See [deployment preparation and operational limits](docs/DEPLOYMENT.md) before deploying. The Atlas product catalog was not reseeded. See [RELEASE](docs/RELEASE.md) for the authorized production rollout.

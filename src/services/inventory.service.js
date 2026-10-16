@@ -18,6 +18,9 @@ class InventoryService {
    */
   async createInventory(inventoryData) {
     try {
+      if (!(await require("../models/product.model").exists({ _id: inventoryData.productId }))) {
+        throw new Error("Product not found");
+      }
 
       // Inventory document database me save kar rahe hain.
       const inventory = await Inventory.create(inventoryData);
@@ -56,6 +59,9 @@ class InventoryService {
    */
   async updateInventory(id, updateData) {
     try {
+      if (updateData.productId && !(await require("../models/product.model").exists({ _id: updateData.productId }))) {
+        throw new Error("Product not found");
+      }
 
       if (!id) {
         throw new Error("Inventory ID is required.");

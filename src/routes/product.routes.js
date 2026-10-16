@@ -2,6 +2,7 @@ const express = require("express");
 
 // Router create kar rahe hain taaki product ke endpoints define kar sake.
 const router = express.Router();
+const { requireAdmin } = require("../middlewares/auth.middleware");
 
 // Product controller functions import kar rahe hain.
 const {
@@ -42,7 +43,7 @@ const {
  * product create karega.
  * --------------------------------------------------
  */
-router.post("/", validateCreateProduct, createProduct);
+router.post("/", requireAdmin, validateCreateProduct, createProduct);
 
 /**
  * --------------------------------------------------
@@ -67,7 +68,7 @@ router.get("/", getAllProducts);
  * Uske baad hi product update hoga.
  * --------------------------------------------------
  */
-router.put("/:id", validateUpdateProduct, updateProduct);
+router.put("/:id", requireAdmin, validateUpdateProduct, updateProduct);
 
 /**
  * --------------------------------------------------
@@ -78,7 +79,7 @@ router.put("/:id", validateUpdateProduct, updateProduct);
  * Product permanently database se remove hoga.
  * --------------------------------------------------
  */
-router.delete("/:id", deleteProduct);
+router.delete("/:id", requireAdmin, deleteProduct);
 
 /**
  * Router export kar rahe hain.
