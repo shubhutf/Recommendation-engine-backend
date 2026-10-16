@@ -2,6 +2,7 @@ const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 require("dotenv").config();
+require("./src/services/auth.service").secret();
 
 const connectDB = require("./config/db");
 const app = require("./src/app");

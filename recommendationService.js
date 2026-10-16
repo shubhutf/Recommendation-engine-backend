@@ -79,7 +79,7 @@ function getRecommendations(sourceProductId, allProducts, inventoryMap, topN = 3
       return bStock - aStock;
     }
 
-    return b.score - a.score;
+    return b.score - a.score || String(a.productId).localeCompare(String(b.productId));
   });
 
   return scored.slice(0, topN);

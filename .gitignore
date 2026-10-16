@@ -12,3 +12,15 @@ npm-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+ml-service/.cache/
+ml-service/data/events.jsonl
+ml-service/data/users.json
+ml-service/data/examples.csv
+ml-service/data/real-*.json*
+.local/
