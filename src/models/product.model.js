@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 // Product model ki structure yahan define ho rahi hai.
 const ProductSchema = new mongoose.Schema(
   {
+    description: { type: String, trim: true, maxlength: 1000 },
     // Product ka naam
     productName: {
       type: String,
