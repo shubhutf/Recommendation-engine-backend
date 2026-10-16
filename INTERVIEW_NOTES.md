@@ -120,7 +120,7 @@ Anonymous users and accounts with fewer than five distinct positively interacted
 
 Impression/legacy logging is bounded and non-blocking, so a process crash or queue overflow can lose counts. Outcome writes are acknowledged and deduplicated; the two log collections are not an atomic transaction. Product cleanup is best effort across collections and events intentionally retain historical snapshots. These are concrete engineering limits, not claims of exactly-once production infrastructure.
 
-Frontend uses sessionStorage bearer tokens and role-aware navigation; the API remains authoritative. Logout clears the session copy rather than revoking every token. No refresh/reset/email-verification flow is included. Deployment guidance exists, but no deployment, remote push, real-user experiment or Docker build was performed.
+Frontend uses sessionStorage bearer tokens and role-aware navigation; the API remains authoritative. Logout clears the session copy rather than revoking every token. No refresh/reset/email-verification flow is included. The app was published through GitHub browser PRs and deployed on Vercel/Render, including a CPU Docker scorer. The release record documents observed checks. No real-user experiment or sustained load test was performed.
 
 ## Likely questions and honest answers
 
@@ -142,7 +142,7 @@ Frontend uses sessionStorage bearer tokens and role-aware navigation; the API re
 
 **What if the Python service is down?** Node's deadline or error handler returns the permanent deterministic baseline and an explicit engine/fallback reason. An actual slow HTTP test and an end-to-end real-model smoke test were run locally.
 
-**Can you claim production readiness or revenue improvement?** No. The implementation is locally verified. Real-user validation, trusted order outcomes, durable logging, stronger deletion consistency and deployment resource testing remain future work.
+**Can you claim production readiness or revenue improvement?** No. Local tests and production smoke checks passed. Real-user validation, trusted order outcomes, durable logging, stronger deletion consistency and sustained resource/load testing remain future work.
 
 **What would you improve first?** Collect consented, attributed real exposures/outcomes; verify purchases from orders; monitor delivery and latency; retrain with temporal snapshots; evaluate using users as uncertainty clusters; then run a controlled online experiment.
 

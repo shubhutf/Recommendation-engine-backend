@@ -20,4 +20,4 @@
 - Local demo: `npm run dev:local` starts disposable Mongo/API without Atlas. `npm run smoke:local` refuses connected databases and verifies actual HTTP model integration. `npm run events:export` writes an ignored real-only export.
 - Verified commands: `npm test`, Python `-m pytest ml-service -q`, frontend lint/build, full HTTP smoke. PowerShell invocations in README/docs/PHASES.md. Python uses 3.11; serving uses Node 22+.
 - Demo smoke actions are QA data in a disposable database, never training observations. Analytics excludes all simulated and unknown-provenance legacy rows.
-- Deployment not performed. Keep limitations in docs/DATA.md, docs/DEPLOYMENT.md and INTERVIEW_NOTES.md honest.
+- Authorized deployment details and observed production checks are in docs/RELEASE.md. Keep limitations in docs/DATA.md, docs/DEPLOYMENT.md and INTERVIEW_NOTES.md honest.
