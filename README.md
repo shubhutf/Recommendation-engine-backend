@@ -2,7 +2,7 @@
 
 Express + MongoDB API with JWT customer/admin access, attributed interaction events, a permanent deterministic fallback, and an evaluated XGBoost ranking model served by FastAPI. Gemini only describes the selected products; it never chooses or ranks them.
 
-The checked-in model was trained on **simulated data**. Results below are actual held-out reranking metrics, not evidence of real-user performance. No deployment was performed.
+The checked-in model was trained on **simulated data**. Results below are actual held-out reranking metrics, not evidence of real-user performance. Current production URLs and rollout verification are recorded in [RELEASE](docs/RELEASE.md).
 
 | Engine | Precision@3 | Recall@3 | NDCG@3 |
 |---|---:|---:|---:|
@@ -116,4 +116,4 @@ The baseline remains `0.4*category + 0.2*priceSimilarity + 0.2*(rating/5) + 0.2*
 
 `src/` owns product/inventory/auth/events; root recommendation modules own orchestration and baseline; `analytics/` owns summaries; `ml-service/` owns shared Python features, simulation, training and scoring. `inventory` stays explicitly bound to that collection. The old `src/controllers/recommendation.controller.js` is unused.
 
-See [deployment preparation and operational limits](docs/DEPLOYMENT.md) before deploying. No production data or external deployments were modified.
+See [deployment preparation and operational limits](docs/DEPLOYMENT.md) before deploying. The Atlas product catalog was not reseeded. See [RELEASE](docs/RELEASE.md) for the authorized production rollout.
