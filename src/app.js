@@ -11,6 +11,7 @@ const analyticsRoutes = require("../analytics/analyticsRoutes");
 
 // Create Express application
 const app = express();
+const { optionalAuth } = require("./middlewares/auth.middleware");
 
 // Recommendation routes import kar rahe hain.
 const recommendationRoutes = require("../recommendationRoutes");
@@ -22,7 +23,7 @@ app.use(helmet());
 // Enable CORS
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: (process.env.CORS_ORIGIN || "http://localhost:5173,http://127.0.0.1:5173").split(",").map(origin => origin.trim()),
     credentials: true,
   })
 );
@@ -40,9 +41,14 @@ app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Server is running",
+    dataMode: app.locals.disposableDemo ? "disposable-demo" : "connected-database",
   });
 });
 // Product related APIs
+app.use(optionalAuth);
+app.use("/api/v1/auth", require("./routes/auth.routes"));
+app.use("/api/v1/events", require("./routes/event.routes"));
+app.use("/api/v1/ml", require("./routes/ml.routes"));
 // Base URL: /api/v1/products
 app.use("/api/v1/products", productRoutes);
 
