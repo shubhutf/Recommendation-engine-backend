@@ -1,6 +1,6 @@
 # Phase plan, delivered work and exact checks
 
-The owner authorized autonomous completion. Both repos use `feature/personalized-ml-ranking` from `origin/develop`. No remote push or deployment is part of this work. Commands below are PowerShell, run from the backend root unless stated otherwise; setup is in README.
+The owner authorized autonomous completion. Both repos use `feature/personalized-ml-ranking` from `origin/develop`. The initial implementation was verified locally; subsequent authorized browser publishing and deployment are recorded in [RELEASE](RELEASE.md). Commands below are PowerShell, run from the backend root unless stated otherwise; setup is in README.
 
 ## 0 — Auth
 
@@ -91,7 +91,7 @@ Hinglish: “Same test slates pe dono engines compare kiye. Simulated test mein 
 
 Plan: authenticated internal HTTP scoring, timeout, category/stock filters, permanent cold-start/outage fallback, factual explanations, insights and CTR UI; local end-to-end verification.
 
-Delivered: FastAPI scorer using the saved model and identical feature code; Node validates all scorer IDs/margins; response records actual serving engine. UI shows score semantics, simulated-data badge, artifact-driven metrics/importance/data summary, helpful controls, click tracking and real-event CTR. Layout retains lime/ink theme, supports narrow screens and lazy loads pages. Docker/Render guidance is prepared; nothing is deployed.
+Delivered: FastAPI scorer using the saved model and identical feature code; Node validates all scorer IDs/margins; response records actual serving engine. UI shows score semantics, simulated-data badge, artifact-driven metrics/importance/data summary, helpful controls, click tracking and real-event CTR. Layout retains lime/ink theme, supports narrow screens and lazy loads pages. Docker/Render setup and the subsequent rollout are recorded in DEPLOYMENT.md and RELEASE.md.
 
 ```powershell
 # Terminal 1
@@ -108,4 +108,4 @@ npm run lint
 npm run build
 ```
 
-Verified locally: nine Node tests, eight Python tests, actual HTTP smoke report (`LOCAL_SMOKE.json`), browser registration/customer nav/cold-start cards/detail click/feedback/Insights. Python has one transitive TestClient deprecation warning. Compatible Node security fixes were applied; production npm audit found no advisories at the recorded check. Docker/Render deployment and real-user quality remain untested.
+Verified locally: nine Node tests, eight Python tests, actual HTTP smoke report (`LOCAL_SMOKE.json`), browser registration/customer nav/cold-start cards/detail click/feedback/Insights. Python has one transitive TestClient deprecation warning. Compatible Node security fixes were applied; production npm audit found no advisories at the recorded check. Subsequent deployment checks are recorded in RELEASE.md. Real-user quality and sustained production load remain untested.
