@@ -1,0 +1,25 @@
+{
+  "brands": 31,
+  "cart_per_click": 0.3499582056283087,
+  "categories": 8,
+  "click_through_rate": 0.12461805555555555,
+  "end": "2026-08-29T23:54:23.596613Z",
+  "event_counts": {
+    "CART": 2512,
+    "CLICK": 7178,
+    "IMPRESSION": 57600,
+    "PURCHASE": 1000,
+    "VIEW": 9600
+  },
+  "events": 77890,
+  "events_sha256": "70c60cd198c912e0f6e80a611067e48f0fccb936fd498e943d8246bd9f7f46b3",
+  "exposure_policy": "uniform random six in-stock same-category alternatives",
+  "products": 128,
+  "purchase_per_cart": 0.3980891719745223,
+  "requests": 9600,
+  "seed": 42,
+  "sessions_per_user": 40,
+  "source": "simulated",
+  "start": "2026-06-01T00:11:04.348135Z",
+  "users": 240
+}
