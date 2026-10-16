@@ -1,0 +1,9 @@
+.cache
+__pycache__
+.pytest_cache
+data/events.jsonl
+data/users.json
+data/examples.csv
+data/real-*
+test_pipeline.py
+.env*
