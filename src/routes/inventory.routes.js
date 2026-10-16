@@ -2,6 +2,7 @@ const express = require("express");
 
 // Router create kar rahe hain.
 const router = express.Router();
+const { requireAdmin } = require("../middlewares/auth.middleware");
 
 // Inventory controller functions import kar rahe hain.
 
@@ -28,7 +29,7 @@ const {
  * ------------------------------------------------------
  */
 // Naya inventory create karne se pehle request validate hogi.
-router.post("/", validateInventory, createInventory);
+router.post("/", requireAdmin, validateInventory, createInventory);
 
 /**
  * ------------------------------------------------------
@@ -39,7 +40,7 @@ router.post("/", validateInventory, createInventory);
  */
 router.get("/", getAllInventory);
 // Existing inventory update karne se pehle request validate hogi.
-router.put("/:id", validateInventory, updateInventory);
+router.put("/:id", requireAdmin, validateInventory, updateInventory);
 
 
 // Router export kar rahe hain.
