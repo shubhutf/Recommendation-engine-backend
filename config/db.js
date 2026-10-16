@@ -16,7 +16,8 @@ const connectDB = async () => {
 
     // Force IPv4 connection
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      family: 4
+      family: 4,
+      dbName: "recommendation_engine"
     });
 
     console.log("Connected Successfully!");
