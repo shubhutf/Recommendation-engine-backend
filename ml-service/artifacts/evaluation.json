@@ -1,0 +1,50 @@
+{
+  "limitation": "Simulated-data metrics are not evidence of real-user performance.",
+  "metrics": {
+    "all_negative_policy": "zero for all three metrics; all requests included",
+    "k": 3,
+    "ml": {
+      "ndcg_at_3": 0.2714433018934525,
+      "precision_at_3": 0.15307732772225144,
+      "recall_at_3": 0.3457390846922672
+    },
+    "ndcg_delta_95pct_bootstrap_ci": [
+      0.04204207243081836,
+      0.07476229248392191
+    ],
+    "requests": 1901,
+    "requests_with_positive": 1041,
+    "rules": {
+      "ndcg_at_3": 0.2131918311573337,
+      "precision_at_3": 0.12975626863054532,
+      "recall_at_3": 0.29186393126424687
+    }
+  },
+  "model_version": "v1-f196f47d",
+  "scope": "Reranking the same six actually shown in-stock same-category candidates. Not a whole-catalog or counterfactual policy evaluation.",
+  "source": "simulated",
+  "split": {
+    "discarded_boundary_rows": 1266,
+    "embargo_hours": 24,
+    "test": {
+      "end": "2026-08-28T23:53:23.991698Z",
+      "requests": 1901,
+      "rows": 11406,
+      "start": "2026-08-11T05:10:05.559944Z"
+    },
+    "test_start": "2026-08-11T05:10:05.559944Z",
+    "train": {
+      "end": "2026-07-23T09:22:49.093805Z",
+      "requests": 5600,
+      "rows": 33600,
+      "start": "2026-06-01T00:11:05.348135Z"
+    },
+    "validation": {
+      "end": "2026-08-10T04:25:57.191024Z",
+      "requests": 1789,
+      "rows": 10734,
+      "start": "2026-07-24T09:30:08.979461Z"
+    },
+    "validation_start": "2026-07-24T09:30:08.979461Z"
+  }
+}

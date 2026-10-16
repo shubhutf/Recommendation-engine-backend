@@ -1,0 +1,169 @@
+{
+  "best_iteration": 6,
+  "dataset": {
+    "brands": 31,
+    "cart_per_click": 0.3499582056283087,
+    "categories": 8,
+    "click_through_rate": 0.12461805555555555,
+    "end": "2026-08-29T23:54:23.596613Z",
+    "event_counts": {
+      "CART": 2512,
+      "CLICK": 7178,
+      "IMPRESSION": 57600,
+      "PURCHASE": 1000,
+      "VIEW": 9600
+    },
+    "events": 77890,
+    "events_sha256": "70c60cd198c912e0f6e80a611067e48f0fccb936fd498e943d8246bd9f7f46b3",
+    "exposure_policy": "uniform random six in-stock same-category alternatives",
+    "products": 128,
+    "purchase_per_cart": 0.3980891719745223,
+    "requests": 9600,
+    "seed": 42,
+    "sessions_per_user": 40,
+    "source": "simulated",
+    "start": "2026-06-01T00:11:04.348135Z",
+    "users": 240
+  },
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "embedding_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "feature_importance": [
+    {
+      "feature": "user_brand_affinity",
+      "importance": 0.13191436231136322
+    },
+    {
+      "feature": "candidate_rating",
+      "importance": 0.11640655994415283
+    },
+    {
+      "feature": "user_category_affinity",
+      "importance": 0.09867125749588013
+    },
+    {
+      "feature": "price_ratio",
+      "importance": 0.09135273844003677
+    },
+    {
+      "feature": "popularity",
+      "importance": 0.08763489872217178
+    },
+    {
+      "feature": "brand_match",
+      "importance": 0.08726789057254791
+    },
+    {
+      "feature": "user_price_fit",
+      "importance": 0.08326973021030426
+    },
+    {
+      "feature": "trend_velocity",
+      "importance": 0.08323203027248383
+    },
+    {
+      "feature": "price_diff",
+      "importance": 0.07729016989469528
+    },
+    {
+      "feature": "embedding_cosine",
+      "importance": 0.07468035817146301
+    },
+    {
+      "feature": "recency_days",
+      "importance": 0.06828000396490097
+    },
+    {
+      "feature": "category_match",
+      "importance": 0.0
+    },
+    {
+      "feature": "in_stock",
+      "importance": 0.0
+    }
+  ],
+  "feature_schema": "v1",
+  "features": [
+    "category_match",
+    "embedding_cosine",
+    "price_diff",
+    "price_ratio",
+    "candidate_rating",
+    "popularity",
+    "in_stock",
+    "brand_match",
+    "user_category_affinity",
+    "user_brand_affinity",
+    "user_price_fit",
+    "recency_days",
+    "trend_velocity"
+  ],
+  "metrics": {
+    "all_negative_policy": "zero for all three metrics; all requests included",
+    "k": 3,
+    "ml": {
+      "ndcg_at_3": 0.2714433018934525,
+      "precision_at_3": 0.15307732772225144,
+      "recall_at_3": 0.3457390846922672
+    },
+    "ndcg_delta_95pct_bootstrap_ci": [
+      0.04204207243081836,
+      0.07476229248392191
+    ],
+    "requests": 1901,
+    "requests_with_positive": 1041,
+    "rules": {
+      "ndcg_at_3": 0.2131918311573337,
+      "precision_at_3": 0.12975626863054532,
+      "recall_at_3": 0.29186393126424687
+    }
+  },
+  "minimum_history": 5,
+  "model_selection": [
+    {
+      "best_iteration": 6,
+      "max_depth": 3,
+      "validation_ndcg_at_3": 0.2894753308579417
+    },
+    {
+      "best_iteration": 10,
+      "max_depth": 5,
+      "validation_ndcg_at_3": 0.2792801433706525
+    }
+  ],
+  "model_sha256": "f196f47d8a19a4d9376aeb1f61971240328379ea11e50c141458fb48464a164c",
+  "objective": "rank:ndcg",
+  "packages": {
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "sentence-transformers": "5.1.1",
+    "xgboost": "3.1.1"
+  },
+  "score_semantics": "uncalibrated ranking margin; not a probability or percentage",
+  "split": {
+    "discarded_boundary_rows": 1266,
+    "embargo_hours": 24,
+    "test": {
+      "end": "2026-08-28T23:53:23.991698Z",
+      "requests": 1901,
+      "rows": 11406,
+      "start": "2026-08-11T05:10:05.559944Z"
+    },
+    "test_start": "2026-08-11T05:10:05.559944Z",
+    "train": {
+      "end": "2026-07-23T09:22:49.093805Z",
+      "requests": 5600,
+      "rows": 33600,
+      "start": "2026-06-01T00:11:05.348135Z"
+    },
+    "validation": {
+      "end": "2026-08-10T04:25:57.191024Z",
+      "requests": 1789,
+      "rows": 10734,
+      "start": "2026-07-24T09:30:08.979461Z"
+    },
+    "validation_start": "2026-07-24T09:30:08.979461Z"
+  },
+  "trained_at": "2026-10-16T16:22:17.538594+00:00",
+  "training_source": "simulated",
+  "version": "v1-f196f47d"
+}

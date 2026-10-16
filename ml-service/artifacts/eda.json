@@ -1,0 +1,28 @@
+{
+  "constant_features": [
+    "category_match",
+    "in_stock"
+  ],
+  "label_counts": {
+    "0": 49906,
+    "1": 4617,
+    "2": 1495,
+    "3": 988
+  },
+  "missing_features": {
+    "brand_match": 0,
+    "candidate_rating": 0,
+    "category_match": 0,
+    "embedding_cosine": 0,
+    "in_stock": 0,
+    "popularity": 0,
+    "price_diff": 0,
+    "price_ratio": 0,
+    "recency_days": 0,
+    "trend_velocity": 0,
+    "user_brand_affinity": 0,
+    "user_category_affinity": 0,
+    "user_price_fit": 0
+  },
+  "source": "simulated"
+}
