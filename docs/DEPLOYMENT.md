@@ -1,24 +1,24 @@
-# Deploy later: no deployment was performed
+# Deployment and operations
 
-Run and verify all services locally first. The existing Vercel/Render deployments remain untouched.
+The authorized rollout uses the existing Vercel frontend and Render API plus a separate Render Docker scorer. Current URLs, release PRs and observed checks are recorded in [RELEASE](RELEASE.md). Local verification remains documented separately.
 
 ## Internal Python scorer on Render
 
-Use the backend repo, root directory `ml-service`, Docker environment and the included Dockerfile. The build installs Python dependencies, Linux OpenMP and the pinned MiniLM model. `ranker.ubj`, `metadata.json` and the vector cache must be included from the reviewed commit. The Docker path is provided as deployment preparation; Docker/Render deployment has not been run here.
+Use the backend repo, root directory `ml-service`, Docker environment and the included Dockerfile. The build installs Python dependencies, Linux OpenMP and the pinned MiniLM model. `ranker.ubj`, `metadata.json` and the vector cache must be included from the reviewed commit. The Docker image was built and deployed successfully on Render; it installs the CPU PyTorch wheel before the remaining requirements.
 
-Set `ENVIRONMENT=production` and a strong random `ML_SERVICE_TOKEN`. Use a private Render service/internal URL reachable from the Node service, or authenticate the public service with that token. The service has no browser CORS configuration by design. The image uses `$PORT` (default 8000); health check is `/health`. Choose resources after measuring startup memory and CPU latency: PyTorch/MiniLM is heavier than Node and may not fit a small free instance. A suspended service can exceed the Node timeout and correctly produce rule-based results.
+The current scorer uses a free Render instance and tracks backend `main`, with root `ml-service` and health `/health`. Its initial startup and readiness check passed; sustained load and memory headroom are not established. Set `ENVIRONMENT=production` and a strong random `ML_SERVICE_TOKEN`. Use a private Render service/internal URL reachable from the Node service, or authenticate the public service with that token. The service has no browser CORS configuration by design. The image uses `$PORT` (default 8000); health check is `/health`. Choose resources after measuring startup memory and CPU latency: PyTorch/MiniLM is heavier than Node and may not fit a small free instance. A suspended service can exceed the Node timeout and correctly produce rule-based results.
 
 The service verifies the model checksum and feature/embedding revision on startup, and preloads MiniLM once. New or edited product text is encoded and cached with the same revision. Its first request can exceed the Node timeout; that request falls back and later requests reuse cached vectors. Use a persistent writable cache or expect cache regeneration on restart. Keep Python package/model artifacts consistent; metadata describes the exact trained version.
 
 ## Node Render service
 
-Set `MONGODB_URI`, a random `JWT_SECRET` of at least 32 bytes, `JWT_EXPIRES_IN=2h`, `CORS_ORIGIN` to the Vercel origin, `ML_SERVICE_URL` to the Python internal base URL, and the matching `ML_SERVICE_TOKEN`. `ML_TIMEOUT_MS=1500` (clamped 100–5000) bounds scoring HTTP time. `ML_MIN_HISTORY=5` counts distinct positively interacted products. `GEMINI_API_KEY` is optional; it only writes factual descriptions and has a 2.5-second timeout per request.
+Set `MONGODB_URI`, a random `JWT_SECRET` of at least 32 bytes, `JWT_EXPIRES_IN=2h`, `CORS_ORIGIN` to the Vercel origin, `ML_SERVICE_URL` to the Python internal base URL, and the matching `ML_SERVICE_TOKEN`. `ML_TIMEOUT_MS=1500` by default (clamped 100–5000) bounds scoring HTTP time; this release configures 5000 ms for the free scorer. `ML_MIN_HISTORY=5` counts distinct positively interacted products. `GEMINI_API_KEY` is optional; it only writes factual descriptions and has a 2.5-second timeout per request.
 
 Use `npm ci --omit=dev` then `npm start`. Node 22+ is required (native fetch/AbortSignal and watch support). Provision an admin once with `npm run admin:create` in a trusted shell, supplying `ADMIN_EMAIL`/`ADMIN_PASSWORD` as environment variables. Public registration cannot create admins. Do not expose admin provisioning as a public HTTP route. Password hashes and JWT secrets must stay server-side.
 
 ## Vercel frontend
 
-Set `VITE_API_BASE_URL=https://YOUR-NODE-HOST/api/v1`, build `npm run build`, output directory `dist`. Keep the existing SPA rewrite to `index.html`. Browser traffic always goes to Node, never directly to the Python scorer. Rebuild when changing a Vite environment variable.
+Set `VITE_API_BASE_URL=https://YOUR-NODE-HOST/api/v1`, build `npm run build`, output directory `dist`. Use the included `vercel.json` SPA rewrite to `index.html`. Browser traffic always goes to Node, never directly to the Python scorer. Rebuild when changing a Vite environment variable.
 
 ## Operational limitations to address before claiming production maturity
 

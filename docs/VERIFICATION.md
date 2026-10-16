@@ -10,4 +10,4 @@
 - Frontend dependency audit after compatible lockfile updates: zero advisories.
 - Production Node dependencies: `npm audit --omit=dev` found zero advisories at the local check after compatible upgrades. No credentials, raw generated/real interaction exports, virtual environment, model download weights or local databases are committed.
 
-Tests used disposable local MongoDB. No Atlas connection, Render/Vercel deployment, remote Git push, real-user study or Docker build was performed. The saved model metrics are simulated-data reranking metrics only.
+These tests used disposable local MongoDB and did not connect to Atlas. Subsequent authorized browser publishing and production rollout are recorded in [RELEASE](RELEASE.md), including the Render Docker build. No real-user study was performed. The saved model metrics are simulated-data reranking metrics only.
